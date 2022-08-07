@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  </head>
+  <body>
+    <!-- Place this where you need payment button -->
+    <button id="payment-button">Pay with Khalti</button>
+
+    <!-- Place this where you need payment button -->
+    <!-- Paste this code anywhere in you body tag -->
+    <script>
+      var amt = "{{send.amount}}";
+      var config = {
+        // replace the publicKey with yours
+        publicKey: "{{  send.AuthKeyPublic}}",
+        productIdentity: "{{send.productIdentity}}",
+        productName: "{{send.productName}}",
+        productUrl: "{{send.productUrl}}",
+        paymentPreference: [
+          "KHALTI",
+          "EBANKING",
+          "MOBILE_BANKING",
+          "CONNECT_IPS",
+          "SCT",
+        ],
+        eventHandler: {
+          onSuccess(payload) {
+            // hit merchant api for initiating verfication
+            var oid = "{{send.oid}}";
+            var id = payload.idx;
+            var URL =
+              "http://127.0.0.1:5000/khalti/verifyorder/" + oid + "/" + id;
+            $.get(URL, function (req, res) {
+              console.log(res);
+            });
+          },
+          onError(error) {
+            console.log(error);
+          },
+          onClose() {
+            console.log("widget is closing");
+          },
+        },
+      };
+
+      var checkout = new KhaltiCheckout(config);
+      var btn = document.getElementById("payment-button");
+      btn.onclick = function () {
+        // minimum transaction amount must be 10, i.e 1000 in paisa.
+        checkout.show({ amount: amt * 10 });
+      };
+    </script>
+    <!-- Paste this code anywhere in you body tag -->
+    ...
+  </body>
+</html>
